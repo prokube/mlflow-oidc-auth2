@@ -1,3 +1,5 @@
+import { getRuntimeConfig } from "../../shared/services/runtime-config";
+
 export type RequestOptions = Omit<RequestInit, "body"> & {
   params?: Record<string, string>;
   body?: string;
@@ -15,7 +17,9 @@ export async function http<T = unknown>(
   options: RequestOptions = {},
 ): Promise<T> {
   const { params, ...rest } = options;
-  const res = await fetch(buildUrl(url, params), {
+  const cfg = await getRuntimeConfig();
+  const prefixedUrl = url.startsWith("http") ? url : `${cfg.basePath}${url}`;
+  const res = await fetch(buildUrl(prefixedUrl, params), {
     ...rest,
     headers: {
       "Content-Type": "application/json",
